@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LOGIN E-DNEVNIK</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    
+    <style>
+        body {
+            background-color: #4A90E2; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 0; 
+        }
+        .login-container {
+            padding: 30px;
+            background-color: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+            max-width: 500px; 
+            width: 90%; 
+        }
+        .header-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .header-section h3 {
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 20px;
+            font-weight: bold;
+            color: #333; 
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            text-align: right; 
+        }
+        .btn-primary {
+            background-color: #4A90E2;
+            border-color: #4A90E2;
+        }
+        .btn-primary:hover {
+            background-color: #3A7BB8;
+            border-color: #3A7BB8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <div class="header-section">
+            <img src="e-dnevnik-logo.png" alt="Big Ben E-Dnevnik Logo" style="width:100px;height:100px;">
+            <h3>LOGIN TO E-DNEVNIK</h3>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <div class="row">
+                    <label for="username" class="col-sm-4 control-label">Korisničko ime:</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="ime.prezime" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="row">
+                    <label for="password" class="col-sm-4 control-label">Lozinka:</label>
+                    <div class="col-sm-8">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="message" class="alert" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        <button type="submit" class="btn btn-primary btn-block" onclick="checkLogin(event)">Login</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+    
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script>
+        // Funkcija za ekstrakciju ID-a učenika (prvi deo pre tačke)
+        function extractStudentId(username) {
+            // "Omer.Smailbegovic" -> "Omer"
+            return username.split('.')[0];
+        }
+
+        function checkLogin(event) {
+            event.preventDefault(); 
+
+            const username = document.getElementById('username').value.trim(); // Trim uklanja razmake
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Lista validnih korisničkih imena učenika
+            const students = [
+                'Omer.Smailbegovic', 
+                'Boris.Dupljanin', 
+                'Nikola.Ujic', 
+                'Matija.Perucica'
+            ];
+
+            let success = false;
+            let role = '';
+            let targetId = '';
+
+            // 1. Provera za NASTAVNIKA
+            if (username === 'Prof.Boris' && password === '2805') {
+                success = true;
+                role = 'Nastavnik';
+                targetId = 'Nastavnik'; // Fiksni ID za nastavnika
+            } 
+            // 2. Provera za UČENIKE
+            else if (students.includes(username) && password === 'ucenik123') {
+                success = true;
+                role = 'Učenik';
+                // Izdvajamo ID (npr. Omer) iz unetog imena (Omer.Smailbegovic)
+                targetId = extractStudentId(username); 
+            }
+
+            // Prikaz rezultata i preusmeravanje
+            messageDiv.style.display = 'block';
+            if (success) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.innerHTML = `**Uspešna prijava!** Dobrodošli, ${role} (${username}). Preusmeravanje...`;
+                
+                // Određivanje destinacije
+                if(role === 'Nastavnik') {
+                    // Preusmeravanje na glavnu stranicu nastavnika (pregled svih ocena)
+                    window.location.href = 'nastavnik.html';
+                } else {
+                    // PREUSMERAVANJE UČENIKA SA ID PARAMETROM
+                    window.location.href = `ucenik.html?student=${targetId}`;
+                }
+                
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.innerHTML = '**Greška pri prijavi!** Proverite korisničko ime i lozinku.';
+            }
+        }
+    </script>
+</body>
+
+</html>

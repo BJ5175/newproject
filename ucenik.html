@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="sr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-DNEVNIK (UČENIK) - PREGLED OCENA</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <style>
+        /* Interni stilovi */
+        .header-jumbotron {
+            margin-bottom: 0;
+            background-color: #4A90E2;
+            padding: 30px 20px;
+            color: white;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .main-content-area {
+            margin-top: 30px;
+        }
+
+        .content-panel {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        /* Stil za kontejner ocene */
+        .grade-item {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            font-size: 16px;
+            border: 1px solid #4A90E2;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+        }
+
+        .grade-value {
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+        .grade-category {
+            font-size: 14px;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        /* Boje za ocene (numerička vrednost) */
+        .grade-5 { color: green; }
+        .grade-4 { color: darkgreen; }
+        .grade-3 { color: orange; }
+        .grade-2 { color: red; }
+        .grade-1 { color: darkred; }
+
+        /* Stil za prosek */
+        .avg-pass { 
+            color: green; 
+            font-weight: bold;
+        }
+        .avg-fail { 
+            color: red; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="jumbotron text-center header-jumbotron">
+        <h1>E-DNEVNIK (UČENIK)</h1>
+    </header>
+
+    <div class="container main-content-area">
+        <div class="row">
+
+            <div class="col-sm-12 content-panel">
+                <nav style="margin-bottom: 20px;">
+                    <ul class="nav nav-pills">
+                        <li class="active"><a>Moje ocene</a></li>
+                        <li><a href="login.html">Odjava</a></li> 
+                    </ul>
+                </nav>
+
+                <h3>Pregled ocena za: <span id="currentStudentName" style="font-weight: bold;">[Učitavanje...]</span></h3>
+                <p class="text-info">Prikazuju se samo ocene ulogovanog učenika.</p>
+
+                <div style="border: 2px solid #4A90E2; padding: 20px; border-radius: 5px; margin-top: 20px;">
+                    <h4>📊 Trenutni prosek: <span id="average-display-single" style="font-size: 1.8em; margin-left: 10px;">0.00</span></h4>
+                    <hr>
+                    <h4>📜 Unesene ocene:</h4>
+                    <div id="grades-display-single">Nema unesenih ocena.</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DEFINICIJE I PODACI ---
+        const STORAGE_KEY = 'eDnevnikStudentGrades';
+        
+        // Mapa ID-eva učenika ka punim imenima
+        const STUDENT_MAP = {
+            'Boris': 'Boris Dupljanin',
+            'Matija': 'Matija Perućica',
+            'Nikola': 'Nikola Ujić',
+            'Omer': 'Omer Smailbegović'
+        };
+
+        let studentGrades = {
+            'Boris': [],
+            'Matija': [],
+            'Nikola': [],
+            'Omer': [],
+        };
+
+        // --- FUNKCIJE ZA PODATKE ---
+
+        function loadGrades() {
+            try {
+                const storedData = localStorage.getItem(STORAGE_KEY);
+                if (storedData) {
+                    const loadedData = JSON.parse(storedData);
+                    // Pobrinite se da postoje samo ključevi koje očekujete
+                    studentGrades = { ...studentGrades, ...loadedData };
+                }
+            } catch (e) {
+                console.error("Greška pri učitavanju iz Local Storage-a:", e);
+            }
+        }
+
+        function calculateAverage(grades) {
+            if (grades.length === 0) {
+                return (0).toFixed(2);
+            }
+            const sum = grades.reduce((acc, grade) => acc + grade.value, 0);
+            return (sum / grades.length).toFixed(2);
+        }
+
+        // Funkcija za čitanje URL parametara (isti kod kao u login.html)
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // --- FUNKCIJA ZA PRIKAZ ---
+
+        function updateSingleStudentData(studentId, fullName) {
+            const grades = studentGrades[studentId] || [];
+            const average = calculateAverage(grades);
+
+            // Ažuriranje imena
+            document.getElementById('currentStudentName').textContent = fullName;
+
+            const gradesContainer = document.getElementById('grades-display-single');
+            const averageContainer = document.getElementById('average-display-single');
+
+            gradesContainer.innerHTML = grades.length > 0 ? '' : 'Nema unesenih ocena.';
+
+            // Generisanje prikaza ocena
+            grades.forEach(grade => {
+                const gradeItem = document.createElement('span');
+                gradeItem.className = 'grade-item';
+
+                const gradeValue = document.createElement('span');
+                gradeValue.className = `grade-value grade-${grade.value}`;
+                gradeValue.textContent = grade.value;
+
+                const gradeCategory = document.createElement('span');
+                gradeCategory.className = 'grade-category';
+                gradeCategory.textContent = `(${grade.category})`;
+
+                gradeItem.appendChild(gradeValue);
+                gradeItem.appendChild(gradeCategory);
+                gradesContainer.appendChild(gradeItem);
+            });
+
+            // Prikaz proseka i stilizacija
+            averageContainer.textContent = average;
+
+            const averageValue = parseFloat(average);
+            if (averageValue >= 2.5) {
+                averageContainer.className = 'avg-pass';
+            } else if (averageValue > 0) {
+                averageContainer.className = 'avg-fail';
+            } else {
+                 averageContainer.className = '';
+            }
+        }
+
+        // --- INICIJALIZACIJA ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGrades();
+            
+            // Čitamo 'student' parametar iz URL-a (koji nam je prosleđen sa login.html)
+            const loggedInStudentId = getUrlParameter('student');
+            const fullName = STUDENT_MAP[loggedInStudentId];
+
+            if (loggedInStudentId && fullName) {
+                updateSingleStudentData(loggedInStudentId, fullName);
+            } else {
+                // Prikaz greške ako ID nedostaje ili nije validan
+                document.getElementById('currentStudentName').textContent = 'NIJE ULOGOVAN';
+                document.getElementById('grades-display-single').innerHTML = '<div class="alert alert-danger">Nevažeći pristup. Molimo vas da se ulogujete.</div>';
+                document.getElementById('average-display-single').textContent = '0.00';
+                document.getElementById('average-display-single').className = '';
+            }
+        });
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="sr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-DNEVNIK (NASTAVNIK)</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+        /* Interni stilovi */
+        .header-jumbotron {
+            margin-bottom: 0;
+            background-color: #4A90E2;
+            padding: 30px 20px;
+            color: white;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .main-content-area {
+            margin-top: 30px;
+        }
+
+        .sidebar {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .content-panel {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        /* Stilovi za tabelu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        /* Stil za dugme za unos (+) */
+        .action-button {
+            border: none;
+            background-color: #4A90E2;
+            border-radius: 3px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .action-button:hover {
+            background-color: #3b7ad0;
+            color: white;
+        }
+        
+        /* Stil za kontejner ocene */
+        .grade-item {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            padding: 3px 5px;
+            border-radius: 3px;
+            background-color: #f9f9f9;
+        }
+        
+        .grade-value {
+             font-weight: bold;
+             margin-right: 2px;
+        }
+        
+        .grade-category {
+             font-size: 12px;
+             color: #666;
+             margin-right: 5px;
+        }
+
+        /* Stil za dugme za brisanje (X) pored ocene */
+        .delete-grade-specific {
+            color: #d9534f;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 5px;
+            text-decoration: none;
+            padding: 0 2px;
+            border: 1px solid #d9534f;
+            border-radius: 50%;
+            font-size: 10px;
+            line-height: 1;
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+        }
+
+        .delete-grade-specific:hover {
+            color: white;
+            background-color: #d9534f;
+        }
+
+        /* Stil za ocene (boja samo za numeričku vrednost) */
+        .grade-5 { color: green; }
+        .grade-4 { color: darkgreen; }
+        .grade-3 { color: orange; }
+        .grade-2 { color: red; }
+        .grade-1 { color: darkred; }
+    </style>
+</head>
+
+<body>
+
+    <header class="jumbotron text-center header-jumbotron">
+        <h1>E-DNEVNIK (NASTAVNIK) - UNOS OCENA</h1>
+    </header>
+
+    <div class="container main-content-area">
+        <div class="row">
+            <div class="col-sm-4 sidebar">
+                <h4>AKCIJE</h4>
+                <nav>
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a href="nastavnik.html">Početna</a></li>
+                        <li class="active"><a href="unos_ocena.html">Unos ocena</a></li>
+                        <li><a href="all_grade_enter.html">Unos grupnih ocjena</a></li>
+                        <li><a href="login.html">Odjava</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="col-sm-8 content-panel">
+
+                <h3>Unos ocena po studentu</h3>
+                <p class="text-info">Podaci o ocenama se čuvaju u Local Storage-u vašeg pretraživača i biće sačuvani nakon zatvaranja stranice.</p>
+
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>STUDENT</th>
+                            <th>OCENE (kliknite X za brisanje)</th>
+                            <th>PROSEK</th>
+                            <th>AKCIJE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-student-id="Boris">
+                            <td>Boris Dupljanin</td>
+                            <td class="grades-display" id="grades-Boris"></td>
+                            <td class="average-display" id="average-Boris"></td>
+                            <td>
+                                <a class="action-button" onclick="openGradeModal('Boris')">+</a>
+                            </td>
+                        </tr>
+                        <tr data-student-id="Matija">
+                            <td>Matija Perućica</td>
+                            <td class="grades-display" id="grades-Matija"></td>
+                            <td class="average-display" id="average-Matija"></td>
+                            <td>
+                                <a class="action-button" onclick="openGradeModal('Matija')">+</a>
+                            </td>
+                        </tr>
+                        <tr data-student-id="Nikola">
+                            <td>Nikola Ujić</td>
+                            <td class="grades-display" id="grades-Nikola"></td>
+                            <td class="average-display" id="average-Nikola"></td>
+                            <td>
+                                <a class="action-button" onclick="openGradeModal('Nikola')">+</a>
+                            </td>
+                        </tr>
+                        <tr data-student-id="Omer">
+                            <td>Omer Smailbegović</td>
+                            <td class="grades-display" id="grades-Omer"></td>
+                            <td class="average-display" id="average-Omer"></td>
+                            <td>
+                                <a class="action-button" onclick="openGradeModal('Omer')">+</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <hr>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gradeModal" role="dialog">
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Unos ocene za studenta: <span id="modalStudentName"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <form id="gradeForm">
+                        <div class="form-group">
+                            <label for="gradeCategory">Kategorija ocenjivanja:</label>
+                            <select class="form-control" id="gradeCategory" required>
+                                <option value="" disabled selected>Izaberite kategoriju</option>
+                                <option value="Zadaća">Zadaća</option>
+                                <option value="Usmeni">Usmeni</option>
+                                <option value="Vježba">Vježba</option>
+                                <option value="Aktivnost">Aktivnost</option>
+                                <option value="Grupni zadatak">Grupni zadatak</option>
+                                <option value="Test">Test</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newGrade">Ocena (1-5):</label>
+                            <input type="number" class="form-control" id="newGrade" min="1" max="5" required>
+                        </div>
+                        <input type="hidden" id="modalStudentId">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Poništi</button>
+                    <button type="button" class="btn btn-primary" onclick="submitGrade()">Sačuvaj ocenu</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        // 1. Definicija ključa za Local Storage
+        const STORAGE_KEY = 'eDnevnikStudentGrades';
+
+        // 2. Inicijalna struktura podataka
+        let studentGrades = {
+            'Boris': [],
+            'Matija': [],
+            'Nikola': [],
+            'Omer': [],
+        };
+        
+        // 3. Funkcija za učitavanje podataka iz Local Storage-a
+        function loadGrades() {
+            try {
+                const storedData = localStorage.getItem(STORAGE_KEY);
+                if (storedData) {
+                    // Spajamo učitane podatke sa inicijalnom strukturom, osiguravajući da imamo sve studente
+                    const loadedData = JSON.parse(storedData);
+                    studentGrades = { ...studentGrades, ...loadedData };
+                }
+            } catch (e) {
+                console.error("Greška pri učitavanju iz Local Storage-a:", e);
+            }
+        }
+        
+        // 4. Funkcija za čuvanje podataka u Local Storage-u
+        function saveGrades() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(studentGrades));
+            } catch (e) {
+                console.error("Greška pri čuvanju u Local Storage-u:", e);
+            }
+        }
+
+
+        // Funkcija za računanje proseka (Nepromenjena)
+        function calculateAverage(grades) {
+            if (grades.length === 0) {
+                return (0).toFixed(2);
+            }
+            const sum = grades.reduce((acc, grade) => acc + grade.value, 0);
+            return (sum / grades.length).toFixed(2);
+        }
+
+        // Funkcija za ažuriranje prikaza ocena i proseka (Dodato pozivanje saveGrades unutar funkcija za izmenu)
+        function updateStudentData(studentId) {
+            const grades = studentGrades[studentId];
+            const average = calculateAverage(grades);
+
+            const gradesContainer = document.getElementById(`grades-${studentId}`);
+            const averageContainer = document.getElementById(`average-${studentId}`);
+
+            // Ažuriranje prikaza ocena
+            gradesContainer.innerHTML = grades.length > 0 ? '' : 'Nema ocena'; 
+            
+            grades.forEach(grade => {
+                const gradeItem = document.createElement('span');
+                gradeItem.className = 'grade-item';
+
+                const gradeValue = document.createElement('span');
+                gradeValue.className = `grade-value grade-${grade.value}`;
+                gradeValue.textContent = grade.value;
+
+                const gradeCategory = document.createElement('span');
+                gradeCategory.className = 'grade-category';
+                gradeCategory.textContent = ` (${grade.category})`;
+
+                const deleteButton = document.createElement('a');
+                deleteButton.className = 'delete-grade-specific';
+                deleteButton.textContent = 'x';
+                deleteButton.title = `Obriši ${grade.value} (${grade.category})`;
+                
+                deleteButton.onclick = () => deleteSpecificGrade(studentId, grade.id);
+
+                gradeItem.appendChild(gradeValue);
+                gradeItem.appendChild(gradeCategory);
+                gradeItem.appendChild(deleteButton);
+                gradesContainer.appendChild(gradeItem);
+            });
+
+            // Ažuriranje prikaza proseka
+            averageContainer.textContent = average;
+
+            // Obeležavanje proseka bojom
+            const averageValue = parseFloat(average);
+            if (averageValue > 0 && averageValue < 2.5) {
+                averageContainer.style.color = 'red';
+                averageContainer.style.fontWeight = 'bold';
+            } else {
+                averageContainer.style.color = '#333';
+                averageContainer.style.fontWeight = 'normal';
+            }
+        }
+
+        // Otvaranje Modala i postavljanje podataka o studentu (Nepromenjena)
+        function openGradeModal(studentId) {
+            const studentRow = $(`tr[data-student-id="${studentId}"]`);
+            const fullName = studentRow.find('td:first').text();
+
+            document.getElementById('modalStudentName').textContent = fullName;
+            document.getElementById('modalStudentId').value = studentId;
+
+            document.getElementById('gradeForm').reset();
+
+            $('#gradeModal').modal('show');
+        }
+
+        // Funkcija za obradu unosa ocene iz Modala (DODATO: saveGrades())
+        function submitGrade() {
+            const studentId = document.getElementById('modalStudentId').value;
+            const category = document.getElementById('gradeCategory').value;
+            const gradeValue = parseInt(document.getElementById('newGrade').value);
+
+            if (!category || !gradeValue || gradeValue < 1 || gradeValue > 5) {
+                alert('Molimo izaberite kategoriju i unesite ocenu između 1 i 5.');
+                return;
+            }
+
+            const newGrade = { 
+                id: Date.now(),
+                value: gradeValue, 
+                category: category 
+            };
+
+            studentGrades[studentId].push(newGrade);
+            
+            saveGrades(); // <--- ČUVANJE U LOCAL STORAGE NAKON UNOSA
+            updateStudentData(studentId);
+
+            $('#gradeModal').modal('hide');
+        }
+
+        // Funkcija za brisanje specifične ocene po ID-ju (DODATO: saveGrades())
+        function deleteSpecificGrade(studentId, gradeId) {
+            const grades = studentGrades[studentId];
+            
+            if (confirm(`Da li ste sigurni da želite obrisati ovu ocenu?`)) {
+                const initialLength = grades.length;
+                
+                // Filtriranje niza i kreiranje novog bez obrisane ocene
+                studentGrades[studentId] = grades.filter(grade => grade.id !== gradeId);
+
+                if (studentGrades[studentId].length < initialLength) {
+                    saveGrades(); // <--- ČUVANJE U LOCAL STORAGE NAKON BRISANJA
+                    updateStudentData(studentId);
+                } else {
+                    alert('Greška pri brisanju ocene.');
+                }
+            }
+        }
+
+
+        // Inicijalno učitavanje podataka
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGrades(); // <--- PRVO UČITAVAMO SAČUVANE PODATKE
+            Object.keys(studentGrades).forEach(studentId => {
+                updateStudentData(studentId); // Zatim ažuriramo prikaz za sve studente
+            });
+        });
+    </script>
+
+</body>
+
+</html>

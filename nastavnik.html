@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="sr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-DNEVNIK (NASTAVNIK)</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+        /* Interni stilovi */
+        .header-jumbotron {
+            margin-bottom: 0;
+            background-color: #4A90E2;
+            padding: 30px 20px;
+            color: white;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .main-content-area {
+            margin-top: 30px;
+        }
+
+        .sidebar {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .content-panel {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        /* Stilovi za tabelu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        /* Stilovi za prikaz ocena */
+        .grade-item {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            padding: 3px 5px;
+            border-radius: 3px;
+            background-color: #f9f9f9;
+        }
+        
+        .grade-value {
+             font-weight: bold;
+             margin-right: 2px;
+        }
+        
+        .grade-category {
+             font-size: 12px;
+             color: #666;
+             margin-right: 5px;
+        }
+
+        /* Stil za ocene (boja samo za numeričku vrednost) */
+        .grade-5 { color: green; }
+        .grade-4 { color: darkgreen; }
+        .grade-3 { color: orange; }
+        .grade-2 { color: red; }
+        .grade-1 { color: darkred; }
+    </style>
+</head>
+
+<body>
+
+    <header class="jumbotron text-center header-jumbotron">
+        <h1>E-DNEVNIK (NASTAVNIK)</h1>
+    </header>
+
+    <div class="container main-content-area">
+        <div class="row">
+            <div class="col-sm-4 sidebar">
+                <h4>AKCIJE</h4>
+                <nav>
+                    <ul class="nav nav-pills nav-stacked">
+                        <li class="active"><a>Početna</a></li>
+                        <li><a href="unos_ocena.html">Unos ocena</a></li>
+                        <li><a href="all_grade_enter.html">Unos grupnih ocjena</a></li>
+                        <li><a href="login.html">Odjava</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="col-sm-8 content-panel">
+
+                <h3>Pregled ocena studenata</h3>
+                <p class="text-info">Ocene se automatski učitavaju iz sačuvane baze (Local Storage-a).</p>
+
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>STUDENT</th>
+                            <th>OCENE (Ocena - Kategorija)</th>
+                            <th>PROSEK</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-student-id="Boris">
+                            <td>Boris Dupljanin</td>
+                            <td class="grades-display" id="grades-Boris"></td>
+                            <td class="average-display" id="average-Boris"></td>
+                        </tr>
+                        <tr data-student-id="Matija">
+                            <td>Matija Perućica</td>
+                            <td class="grades-display" id="grades-Matija"></td>
+                            <td class="average-display" id="average-Matija"></td>
+                        </tr>
+                        <tr data-student-id="Nikola">
+                            <td>Nikola Ujić</td>
+                            <td class="grades-display" id="grades-Nikola"></td>
+                            <td class="average-display" id="average-Nikola"></td>
+                        </tr>
+                        <tr data-student-id="Omer">
+                            <td>Omer Smailbegović</td>
+                            <td class="grades-display" id="grades-Omer"></td>
+                            <td class="average-display" id="average-Omer"></td>
+                        </tr>
+                        </tbody>
+                </table>
+                
+                <hr>
+                <div class="alert alert-info" role="alert">
+                    Sve ocene su učitane iz Local Storage-a.
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Definicija ključa za Local Storage
+        const STORAGE_KEY = 'eDnevnikStudentGrades';
+
+        // 2. Inicijalna struktura studenata (koristi se kao fallback i za definisanje studenata)
+        let studentGrades = {
+            'Boris': [],
+            'Matija': [],
+            'Nikola': [],
+            'Omer': [],
+        };
+        
+        // 3. Funkcija za učitavanje podataka iz Local Storage-a
+        function loadGrades() {
+            try {
+                const storedData = localStorage.getItem(STORAGE_KEY);
+                if (storedData) {
+                    const loadedData = JSON.parse(storedData);
+                    // Spajamo učitane podatke sa inicijalnom strukturom
+                    studentGrades = { ...studentGrades, ...loadedData };
+                }
+            } catch (e) {
+                console.error("Greška pri učitavanju iz Local Storage-a:", e);
+            }
+        }
+        
+        // Funkcija za računanje proseka
+        function calculateAverage(grades) {
+            if (grades.length === 0) {
+                return (0).toFixed(2);
+            }
+            // Zbrajamo samo vrednosti (value)
+            const sum = grades.reduce((acc, grade) => acc + grade.value, 0);
+            return (sum / grades.length).toFixed(2);
+        }
+
+        // Funkcija za ažuriranje prikaza ocena i proseka (Preneta iz unos_ocena.html)
+        function updateStudentData(studentId) {
+            const grades = studentGrades[studentId] || []; // Koristi prazan niz ako studentId ne postoji
+            const average = calculateAverage(grades);
+
+            const gradesContainer = document.getElementById(`grades-${studentId}`);
+            const averageContainer = document.getElementById(`average-${studentId}`);
+
+            // Ažuriranje prikaza ocena
+            gradesContainer.innerHTML = grades.length > 0 ? '' : 'Nema ocena'; 
+            
+            grades.forEach(grade => {
+                // Kontejner (Ocena + Kategorija)
+                const gradeItem = document.createElement('span');
+                gradeItem.className = 'grade-item';
+
+                // 1. Numerička vrednost ocene
+                const gradeValue = document.createElement('span');
+                gradeValue.className = `grade-value grade-${grade.value}`;
+                gradeValue.textContent = grade.value;
+
+                // 2. Kategorija (u zagradi)
+                const gradeCategory = document.createElement('span');
+                gradeCategory.className = 'grade-category';
+                gradeCategory.textContent = ` (${grade.category})`;
+
+                // Sklapanje elementa
+                gradeItem.appendChild(gradeValue);
+                gradeItem.appendChild(gradeCategory);
+                // Ne dodajemo dugme za brisanje "X" na ovoj stranici, samo prikaz
+                
+                gradesContainer.appendChild(gradeItem);
+            });
+
+            // Ažuriranje prikaza proseka
+            averageContainer.textContent = average;
+
+            // Obeležavanje proseka bojom
+            const averageValue = parseFloat(average);
+            if (averageValue > 0 && averageValue < 2.5) {
+                averageContainer.style.color = 'red';
+                averageContainer.style.fontWeight = 'bold';
+            } else {
+                averageContainer.style.color = '#333';
+                averageContainer.style.fontWeight = 'normal';
+            }
+        }
+
+
+        // Inicijalno učitavanje podataka pri učitavanju stranice
+        $(document).ready(function() {
+            loadGrades(); // Učitavamo sačuvane podatke
+            
+            // Prolazimo kroz sve studente definisane u JS objektu
+            Object.keys(studentGrades).forEach(studentId => {
+                updateStudentData(studentId); // Ažuriramo prikaz za svakog studenta
+            });
+            
+            console.log("Stranica je učitana, podaci su prikazani iz Local Storage-a.");
+        });
+    </script>
+
+</body>
+
+</html>

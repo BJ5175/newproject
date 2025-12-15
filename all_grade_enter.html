@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="sr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-DNEVNIK (NASTAVNIK) - UNOS OCENA</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+        /* Interni stilovi */
+        .header-jumbotron {
+            margin-bottom: 0;
+            background-color: #4A90E2;
+            padding: 30px 20px;
+            color: white;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .main-content-area {
+            margin-top: 30px;
+        }
+
+        .sidebar {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .content-panel {
+            border: 2px solid #4A90E2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        /* Stilovi za tabelu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        /* Stil za GLAVNO dugme za unos (ZELENO) */
+        .action-button-group {
+            border: none;
+            background-color: #5cb85c;
+            border-radius: 3px;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .action-button-group:hover {
+            background-color: #4cae4c;
+            color: white;
+        }
+
+        /* Stil za input polje ocene */
+        .grade-input {
+            width: 70px; /* Povećano da bolje izgleda */
+            padding: 5px;
+            text-align: center;
+        }
+
+        /* Stil za kontejner ocene (ostatak stilova) */
+        .grade-item {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            padding: 3px 5px;
+            border-radius: 3px;
+            background-color: #f9f9f9;
+        }
+
+        .grade-value {
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+        .grade-category {
+            font-size: 12px;
+            color: #666;
+            margin-right: 5px;
+        }
+
+        .delete-grade-specific {
+            color: #d9534f;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 5px;
+            text-decoration: none;
+            padding: 0 2px;
+            border: 1px solid #d9534f;
+            border-radius: 50%;
+            font-size: 10px;
+            line-height: 1;
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+        }
+
+        .delete-grade-specific:hover {
+            color: white;
+            background-color: #d9534f;
+        }
+
+        .grade-5 { color: green; }
+        .grade-4 { color: darkgreen; }
+        .grade-3 { color: orange; }
+        .grade-2 { color: red; }
+        .grade-1 { color: darkred; }
+    </style>
+</head>
+
+<body>
+
+    <header class="jumbotron text-center header-jumbotron">
+        <h1>E-DNEVNIK (NASTAVNIK) - UNOS OCENA</h1>
+    </header>
+
+    <div class="container main-content-area">
+        <div class="row">
+            <div class="col-sm-4 sidebar">
+                <h4>AKCIJE</h4>
+                <nav>
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a href="nastavnik.html">Početna</a></li>
+                        <li><a href="unos_ocena.html">Unos ocena</a></li>
+                        <li class="active"><a href="all_grade_enter.html">Unos grupnih ocjena</a></li>
+                        <li><a href="login.html">Odjava</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="col-sm-8 content-panel">
+
+                <h3>Grupni unos po kategoriji</h3>
+                <p class="text-info">Prvo odaberite **Kategoriju** ocenjivanja. Zatim unesite ocene (1-5) pored svakog
+                    studenta i na kraju kliknite na **Unesi ocjene** da bi se sve ocene snimile odjednom.</p>
+
+                <div class="row form-inline" style="margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                    
+                    <div class="form-group col-sm-6">
+                        <label for="groupGradeCategory">Kategorija:</label>
+                        <select class="form-control" id="groupGradeCategory" required>
+                            <option value="" disabled selected>Izaberite kategoriju</option>
+                            <option value="Zadaća">Zadaća</option>
+                            <option value="Usmeni">Usmeni</option>
+                            <option value="Vježba">Vježba</option>
+                            <option value="Aktivnost">Aktivnost</option>
+                            <option value="Grupni zadatak">Grupni zadatak</option>
+                            <option value="Test">Test</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-sm-6 text-right">
+                        <button class="action-button-group" onclick="submitAllGrades()">Unesi ocjene</button>
+                    </div>
+                </div>
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>STUDENT</th>
+                            <th>OCENE (kliknite X za brisanje)</th>
+                            <th>PROSEK</th>
+                            <th>AKCIJE (Unesite ocenu 1-5)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-student-id="Boris">
+                            <td>Boris Dupljanin</td>
+                            <td class="grades-display" id="display-Boris"></td>
+                            <td class="average-display" id="average-Boris"></td>
+                            <td>
+                                <input type="number" class="form-control grade-input" id="input-Boris" min="1" max="5">
+                            </td>
+                        </tr>
+                        <tr data-student-id="Matija">
+                            <td>Matija Perućica</td>
+                            <td class="grades-display" id="display-Matija"></td>
+                            <td class="average-display" id="average-Matija"></td>
+                            <td>
+                                <input type="number" class="form-control grade-input" id="input-Matija" min="1" max="5">
+                            </td>
+                        </tr>
+                        <tr data-student-id="Nikola">
+                            <td>Nikola Ujić</td>
+                            <td class="grades-display" id="display-Nikola"></td>
+                            <td class="average-display" id="average-Nikola"></td>
+                            <td>
+                                <input type="number" class="form-control grade-input" id="input-Nikola" min="1" max="5">
+                            </td>
+                        </tr>
+                        <tr data-student-id="Omer">
+                            <td>Omer Smailbegović</td>
+                            <td class="grades-display" id="display-Omer"></td>
+                            <td class="average-display" id="average-Omer"></td>
+                            <td>
+                                <input type="number" class="form-control grade-input" id="input-Omer" min="1" max="5">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <hr>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 1. Definicija ključa za Local Storage
+        const STORAGE_KEY = 'eDnevnikStudentGrades';
+
+        // 2. Inicijalna struktura podataka
+        let studentGrades = {
+            'Boris': [],
+            'Matija': [],
+            'Nikola': [],
+            'Omer': [],
+        };
+
+        // 3. Funkcija za učitavanje podataka iz Local Storage-a
+        function loadGrades() {
+            try {
+                const storedData = localStorage.getItem(STORAGE_KEY);
+                if (storedData) {
+                    const loadedData = JSON.parse(storedData);
+                    studentGrades = { ...studentGrades, ...loadedData };
+                }
+            } catch (e) {
+                console.error("Greška pri učitavanju iz Local Storage-a:", e);
+            }
+        }
+
+        // 4. Funkcija za čuvanje podataka u Local Storage-u
+        function saveGrades() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(studentGrades));
+            } catch (e) {
+                console.error("Greška pri čuvanju u Local Storage-u:", e);
+            }
+        }
+
+        // Funkcija za računanje proseka
+        function calculateAverage(grades) {
+            if (grades.length === 0) {
+                return (0).toFixed(2);
+            }
+            const sum = grades.reduce((acc, grade) => acc + grade.value, 0);
+            return (sum / grades.length).toFixed(2);
+        }
+
+        // Funkcija za ažuriranje prikaza ocena i proseka
+        function updateStudentData(studentId) {
+            const grades = studentGrades[studentId];
+            const average = calculateAverage(grades);
+
+            const gradesContainer = document.getElementById(`display-${studentId}`);
+            const averageContainer = document.getElementById(`average-${studentId}`);
+
+            gradesContainer.innerHTML = grades.length > 0 ? '' : 'Nema ocena';
+
+            grades.forEach(grade => {
+                const gradeItem = document.createElement('span');
+                gradeItem.className = 'grade-item';
+
+                const gradeValue = document.createElement('span');
+                gradeValue.className = `grade-value grade-${grade.value}`;
+                gradeValue.textContent = grade.value;
+
+                const gradeCategory = document.createElement('span');
+                gradeCategory.className = 'grade-category';
+                gradeCategory.textContent = ` (${grade.category})`;
+
+                const deleteButton = document.createElement('a');
+                deleteButton.className = 'delete-grade-specific';
+                deleteButton.textContent = 'x';
+                deleteButton.title = `Obriši ${grade.value} (${grade.category})`;
+
+                deleteButton.onclick = () => deleteSpecificGrade(studentId, grade.id);
+
+                gradeItem.appendChild(gradeValue);
+                gradeItem.appendChild(gradeCategory);
+                gradeItem.appendChild(deleteButton);
+                gradesContainer.appendChild(gradeItem);
+            });
+
+            averageContainer.textContent = average;
+
+            const averageValue = parseFloat(average);
+            if (averageValue > 0 && averageValue < 2.5) {
+                averageContainer.style.color = 'red';
+                averageContainer.style.fontWeight = 'bold';
+            } else {
+                averageContainer.style.color = '#333';
+                averageContainer.style.fontWeight = 'normal';
+            }
+        }
+
+        // GLAVNA FUNKCIJA ZA UNOS SVIH OCENA ODJEDNOM
+        function submitAllGrades() {
+            const category = document.getElementById('groupGradeCategory').value;
+            
+            if (!category) {
+                alert('Molimo izaberite KATEGORIJU ocenjivanja (gore levo) pre unosa ocena.');
+                return;
+            }
+
+            let gradesToSaveCount = 0;
+            const studentIds = Object.keys(studentGrades);
+            
+            // Prolazimo kroz sve studente i prikupljamo ocene
+            studentIds.forEach(studentId => {
+                const gradeInput = document.getElementById(`input-${studentId}`);
+                const gradeValueStr = gradeInput.value;
+                
+                // Provera da li je ocena uneta i validna (1-5)
+                const gradeValue = parseInt(gradeValueStr);
+
+                if (gradeValueStr && gradeValue >= 1 && gradeValue <= 5) {
+                    const newGrade = {
+                        // Koristimo kombinaciju vremena i ID-a studenta da osiguramo jedinstvenost ocene
+                        id: Date.now() + Math.random(), 
+                        value: gradeValue,
+                        category: category
+                    };
+
+                    studentGrades[studentId].push(newGrade);
+                    gradesToSaveCount++;
+                    
+                    // Ažuriramo prikaz odmah nakon dodavanja
+                    updateStudentData(studentId);
+                    
+                    // Resetovanje input polja nakon što je ocena snimljena
+                    gradeInput.value = ''; 
+                }
+            });
+
+            if (gradesToSaveCount > 0) {
+                saveGrades(); 
+                alert(`Uspešno je snimljeno ${gradesToSaveCount} ocena za kategoriju: ${category}.`);
+                // Opcionalno, resetovanje kategorije
+                document.getElementById('groupGradeCategory').selectedIndex = 0;
+
+            } else {
+                alert('Nema unesenih novih ocena (1-5) za snimanje. Proverite da li su polja pored studenata popunjena.');
+            }
+        }
+
+        // Funkcija za brisanje specifične ocene po ID-ju
+        function deleteSpecificGrade(studentId, gradeId) {
+            const grades = studentGrades[studentId];
+
+            if (confirm(`Da li ste sigurni da želite obrisati ovu ocenu?`)) {
+                const initialLength = grades.length;
+
+                studentGrades[studentId] = grades.filter(grade => grade.id !== gradeId);
+
+                if (studentGrades[studentId].length < initialLength) {
+                    saveGrades(); 
+                    updateStudentData(studentId);
+                } else {
+                    alert('Greška pri brisanju ocene.');
+                }
+            }
+        }
+
+        // Inicijalno učitavanje podataka
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGrades(); 
+            Object.keys(studentGrades).forEach(studentId => {
+                updateStudentData(studentId); 
+            });
+        });
+    </script>
+
+</body>
+
+</html>
