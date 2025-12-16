@@ -7,7 +7,7 @@
     <title>E-DNEVNIK (NASTAVNIK)</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    
+
     <style>
         /* Interni stilovi */
         .header-jumbotron {
@@ -64,24 +64,38 @@
             border-radius: 3px;
             background-color: #f9f9f9;
         }
-        
+
         .grade-value {
-             font-weight: bold;
-             margin-right: 2px;
+            font-weight: bold;
+            margin-right: 2px;
         }
-        
+
         .grade-category {
-             font-size: 12px;
-             color: #666;
-             margin-right: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-right: 5px;
         }
 
         /* Stil za ocene (boja samo za numeričku vrednost) */
-        .grade-5 { color: green; }
-        .grade-4 { color: darkgreen; }
-        .grade-3 { color: orange; }
-        .grade-2 { color: red; }
-        .grade-1 { color: darkred; }
+        .grade-5 {
+            color: green;
+        }
+
+        .grade-4 {
+            color: darkgreen;
+        }
+
+        .grade-3 {
+            color: orange;
+        }
+
+        .grade-2 {
+            color: red;
+        }
+
+        .grade-1 {
+            color: darkred;
+        }
     </style>
 </head>
 
@@ -100,7 +114,8 @@
                         <li class="active"><a>Početna</a></li>
                         <li><a href="unos_ocena.html">Unos ocena</a></li>
                         <li><a href="all_grade_enter.html">Unos grupnih ocjena</a></li>
-                        <li><a href="#" onclick="handleLogout()">Odjava</a></li> </ul>
+                        <li><a href="#" onclick="handleLogout()">Odjava</a></li>
+                    </ul>
                 </nav>
             </div>
 
@@ -140,7 +155,7 @@
                         </tr>
                     </tbody>
                 </table>
-                
+
                 <hr>
                 <div class="alert alert-info" role="alert">
                     Sve ocene su učitane iz Local Storage-a.
@@ -164,13 +179,10 @@
             'Nikola': [],
             'Omer': [],
         };
-        
-        // --- FUNKCIJA ZA ODJAVU ---
-        // Rešava 404 grešku preusmeravanjem na login stranicu (index.html)
-        function handleLogout() {
-            window.location.href = 'index.html'; 
-        }
 
+        function handleLogout() {
+            window.location.href = 'index.html';
+        }
         // 3. Funkcija za učitavanje podataka iz Local Storage-a
         function loadGrades() {
             try {
@@ -185,7 +197,7 @@
                 console.error("Greška pri učitavanju iz Local Storage-a:", e);
             }
         }
-        
+
         // Funkcija za računanje proseka
         function calculateAverage(grades) {
             if (grades.length === 0) {
@@ -205,8 +217,8 @@
             const averageContainer = document.getElementById(`average-${studentId}`);
 
             // Ažuriranje prikaza ocena
-            gradesContainer.innerHTML = grades.length > 0 ? '' : 'Nema ocena'; 
-            
+            gradesContainer.innerHTML = grades.length > 0 ? '' : 'Nema ocena';
+
             grades.forEach(grade => {
                 // Kontejner (Ocena + Kategorija)
                 const gradeItem = document.createElement('span');
@@ -225,7 +237,7 @@
                 // Sklapanje elementa
                 gradeItem.appendChild(gradeValue);
                 gradeItem.appendChild(gradeCategory);
-                
+
                 gradesContainer.appendChild(gradeItem);
             });
 
@@ -245,18 +257,18 @@
 
 
         // Inicijalno učitavanje podataka pri učitavanju stranice
-        $(document).ready(function() {
+        $(document).ready(function () {
             loadGrades(); // Učitavamo sačuvane podatke
-            
+
             // Prolazimo kroz sve studente definisane u JS objektu
             Object.keys(studentGrades).forEach(studentId => {
                 updateStudentData(studentId); // Ažuriramo prikaz za svakog studenta
             });
-            
+
             console.log("Stranica nastavnika je učitana, podaci su prikazani.");
         });
     </script>
-    
+
 </body>
 
 </html>

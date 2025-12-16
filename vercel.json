@@ -5,7 +5,15 @@
       "destination": "/index.html"
     },
     {
-      "source": "/:path((?!index\\.html|ucenik\\.html|nastavnik\\.html).*)",
+      "source": "/ucenik",
+      "destination": "/ucenik.html"
+    },
+    {
+      "source": "/nastavnik",
+      "destination": "/nastavnik.html"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
