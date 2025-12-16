@@ -52,19 +52,34 @@
         }
 
         /* Boje za ocene (numerička vrednost) */
-        .grade-5 { color: green; }
-        .grade-4 { color: darkgreen; }
-        .grade-3 { color: orange; }
-        .grade-2 { color: red; }
-        .grade-1 { color: darkred; }
+        .grade-5 {
+            color: green;
+        }
+
+        .grade-4 {
+            color: darkgreen;
+        }
+
+        .grade-3 {
+            color: orange;
+        }
+
+        .grade-2 {
+            color: red;
+        }
+
+        .grade-1 {
+            color: darkred;
+        }
 
         /* Stil za prosek */
-        .avg-pass { 
-            color: green; 
+        .avg-pass {
+            color: green;
             font-weight: bold;
         }
-        .avg-fail { 
-            color: red; 
+
+        .avg-fail {
+            color: red;
             font-weight: bold;
         }
     </style>
@@ -83,15 +98,17 @@
                 <nav style="margin-bottom: 20px;">
                     <ul class="nav nav-pills">
                         <li class="active"><a>Moje ocene</a></li>
-                        <li><a href="index.html">Odjava</a></li> 
+                        <li><a href="#" onclick="handleLogout()">Odjava</a></li>
                     </ul>
                 </nav>
 
-                <h3>Pregled ocena za: <span id="currentStudentName" style="font-weight: bold;">[Učitavanje...]</span></h3>
+                <h3>Pregled ocena za: <span id="currentStudentName" style="font-weight: bold;">[Učitavanje...]</span>
+                </h3>
                 <p class="text-info">Prikazuju se samo ocene ulogovanog učenika.</p>
 
                 <div style="border: 2px solid #4A90E2; padding: 20px; border-radius: 5px; margin-top: 20px;">
-                    <h4>📊 Trenutni prosek: <span id="average-display-single" style="font-size: 1.8em; margin-left: 10px;">0.00</span></h4>
+                    <h4>📊 Trenutni prosek: <span id="average-display-single"
+                            style="font-size: 1.8em; margin-left: 10px;">0.00</span></h4>
                     <hr>
                     <h4>📜 Unesene ocene:</h4>
                     <div id="grades-display-single">Nema unesenih ocena.</div>
@@ -104,7 +121,7 @@
     <script>
         // --- DEFINICIJE I PODACI ---
         const STORAGE_KEY = 'eDnevnikStudentGrades';
-        
+
         // Mapa ID-eva učenika ka punim imenima
         const STUDENT_MAP = {
             'Boris': 'Boris Dupljanin',
@@ -192,15 +209,21 @@
             } else if (averageValue > 0) {
                 averageContainer.className = 'avg-fail';
             } else {
-                 averageContainer.className = '';
+                averageContainer.className = '';
             }
+        }
+        // --- FUNKCIJA ZA ODJAVU ---
+
+        function handleLogout() {
+            // Preusmeravanje korisnika na Login stranicu (index.html)
+            window.location.href = 'index.html';
         }
 
         // --- INICIJALIZACIJA ---
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             loadGrades();
-            
+
             // Čitamo 'student' parametar iz URL-a (koji nam je prosleđen sa login.html)
             const loggedInStudentId = getUrlParameter('student');
             const fullName = STUDENT_MAP[loggedInStudentId];

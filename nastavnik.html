@@ -7,9 +7,7 @@
     <title>E-DNEVNIK (NASTAVNIK)</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+    
     <style>
         /* Interni stilovi */
         .header-jumbotron {
@@ -102,8 +100,7 @@
                         <li class="active"><a>Početna</a></li>
                         <li><a href="unos_ocena.html">Unos ocena</a></li>
                         <li><a href="all_grade_enter.html">Unos grupnih ocjena</a></li>
-                        <li><a href="index.html">Odjava</a></li>
-                    </ul>
+                        <li><a href="#" onclick="handleLogout()">Odjava</a></li> </ul>
                 </nav>
             </div>
 
@@ -112,7 +109,7 @@
                 <h3>Pregled ocena studenata</h3>
                 <p class="text-info">Ocene se automatski učitavaju iz sačuvane baze (Local Storage-a).</p>
 
-                <table id="studentsTable">
+                <table id="studentsTable" class="table table-hover">
                     <thead>
                         <tr>
                             <th>STUDENT</th>
@@ -141,7 +138,7 @@
                             <td class="grades-display" id="grades-Omer"></td>
                             <td class="average-display" id="average-Omer"></td>
                         </tr>
-                        </tbody>
+                    </tbody>
                 </table>
                 
                 <hr>
@@ -153,11 +150,14 @@
         </div>
     </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
     <script>
         // 1. Definicija ključa za Local Storage
         const STORAGE_KEY = 'eDnevnikStudentGrades';
 
-        // 2. Inicijalna struktura studenata (koristi se kao fallback i za definisanje studenata)
+        // 2. Inicijalna struktura studenata
         let studentGrades = {
             'Boris': [],
             'Matija': [],
@@ -165,6 +165,12 @@
             'Omer': [],
         };
         
+        // --- FUNKCIJA ZA ODJAVU ---
+        // Rešava 404 grešku preusmeravanjem na login stranicu (index.html)
+        function handleLogout() {
+            window.location.href = 'index.html'; 
+        }
+
         // 3. Funkcija za učitavanje podataka iz Local Storage-a
         function loadGrades() {
             try {
@@ -172,6 +178,7 @@
                 if (storedData) {
                     const loadedData = JSON.parse(storedData);
                     // Spajamo učitane podatke sa inicijalnom strukturom
+                    // Ovo osigurava da zadržimo listu studenata čak i ako nema ocena u LS
                     studentGrades = { ...studentGrades, ...loadedData };
                 }
             } catch (e) {
@@ -189,7 +196,7 @@
             return (sum / grades.length).toFixed(2);
         }
 
-        // Funkcija za ažuriranje prikaza ocena i proseka (Preneta iz unos_ocena.html)
+        // Funkcija za ažuriranje prikaza ocena i proseka
         function updateStudentData(studentId) {
             const grades = studentGrades[studentId] || []; // Koristi prazan niz ako studentId ne postoji
             const average = calculateAverage(grades);
@@ -218,7 +225,6 @@
                 // Sklapanje elementa
                 gradeItem.appendChild(gradeValue);
                 gradeItem.appendChild(gradeCategory);
-                // Ne dodajemo dugme za brisanje "X" na ovoj stranici, samo prikaz
                 
                 gradesContainer.appendChild(gradeItem);
             });
@@ -226,7 +232,7 @@
             // Ažuriranje prikaza proseka
             averageContainer.textContent = average;
 
-            // Obeležavanje proseka bojom
+            // Obeležavanje proseka bojom (manje od 2.5 je crveno)
             const averageValue = parseFloat(average);
             if (averageValue > 0 && averageValue < 2.5) {
                 averageContainer.style.color = 'red';
@@ -247,10 +253,10 @@
                 updateStudentData(studentId); // Ažuriramo prikaz za svakog studenta
             });
             
-            console.log("Stranica je učitana, podaci su prikazani iz Local Storage-a.");
+            console.log("Stranica nastavnika je učitana, podaci su prikazani.");
         });
     </script>
-
+    
 </body>
 
 </html>
